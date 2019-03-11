@@ -5,7 +5,7 @@ summarize_command = Subcommand('summarize', help='summarize library statistics')
 
 summarize_command.parser.add_option(
     u'-g', u'--group-by', type='string',
-    help=u'field to group by'
+    help=u'field to group by', default='genre'
 )
 
 summarize_command.parser.add_option(
@@ -63,7 +63,7 @@ def parse_stats(stats):
             
         # Get specific modifiers
         this['unique'] = "unique" in modifiers
-
+        
     return out_dct, stats[0]
 
 def validate_stat(stat, stat_type):
@@ -120,12 +120,12 @@ def get_items_stat(items, stat):
     collection = list(collection)
     
     # Convert str stats
-    if stat_type is str:
+    if stat_type is str and stat['aggregator'] != "count":
         if stat['str_converter'] == "len":
             collection = [len(c) for c in collection]
         elif stat['str_converter'] == 'words':
             collection = [len(c.split(" ")) for c in collection]
-
+    
     # Aggregate
     if stat['aggregator'] == 'min':
         return min(collection)
