@@ -8,8 +8,8 @@ python:
 
 install:
   - pip install -r requirements_dev.txt
-  - pip install python-coveralls
-  - pip install coveralls tox-travis
+  - pip install coveralls-python
+  - pip install tox-travis
 
 script:
   - tox
