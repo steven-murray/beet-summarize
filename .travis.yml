@@ -8,16 +8,14 @@ python:
 
 install:
   - pip install -r requirements_dev.txt
-  - pip install coveralls-python
+  - pip install coveralls
   - pip install tox-travis
   - pip install .
 
 script:
   - tox
-  - py.test --cov summarize
+  - py.test --cov=summarize
   - coverage report -m
 
-# Calculate coverage
 after_success:
-  - ls -a
   - coveralls
