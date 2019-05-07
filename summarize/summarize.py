@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from beets.plugins import BeetsPlugin
 from beets.ui import Subcommand, decargs
 
@@ -19,60 +21,83 @@ summarize_command.parser.add_option(
 )
 
 
-def parse_stats(stats):
-    """Parse a cmdline stats string"""
-    stats = stats.split(" ")
+def parse_stat(stat):
+    """Parse a cmdline stat string
 
+    :param stat: string specifying the statistic to obtain. Format is
+        "aggregator<:modifier>|field". Available aggregators are {min, max,
+        count, sum, avg, range}. Available modifiers are {unique, len, words},
+        where the final two are only available for string fields. Available
+        `fields` are any beets field.
+
+    :return: dict specifying the stat. Keys are 'field' (str field), 'aggregator'
+        (str aggregator), 'str_converter' (either 'len' or 'words' or None),
+        and 'unique' (bool).
+    """
     aggregators = ['min', 'max', 'count', 'sum', 'avg', 'range']
     str_converters = ['len', 'words']
 
-    out_dct = {}
-    for stat in stats:
-        this = out_dct[stat] = {}
+    this = {}
 
-        # Special case: count
-        if stat.lower() == 'count':
-            this['field'] = 'title'  # irrelevant
-            this['aggregator'] = 'count'
-            this['str_converter'] = None
-            this['unique'] = False
-            continue
+    # Special case: count
+    if stat.lower() == 'count':
+        this['field'] = 'title'  # irrelevant
+        this['aggregator'] = 'count'
+        this['str_converter'] = None
+        this['unique'] = False
+        return this
 
-        # Get the field name of the statistic
-        this['field'] = stat.split("|")[-1].lower()
+    # Get the field name of the statistic
+    this['field'] = stat.split("|")[-1].lower()
 
-        # There doesn't *need* to be any modifiers.
-        modifiers = stat.split("|")[0].lower() if "|" in stat else []
+    # There doesn't *need* to be any modifiers.
+    modifiers = stat.split("|")[0].lower().split(":") if "|" in stat else []
 
-        # Determine the aggregator for this statistic
-        aggregator = None
-        for agg in aggregators:
-            if agg in modifiers:
-                if aggregator is None:
-                    this['aggregator'] = aggregator = agg
-                else:
-                    raise ValueError("You have specified more than one aggregator: {}".format(stat))
+    # Determine the aggregator for this statistic
+    aggregator = None
+    for agg in aggregators:
+        if agg in modifiers:
+            if aggregator is None:
+                this['aggregator'] = aggregator = agg
+            else:
+                raise ValueError("You have specified more than one aggregator: {}".format(stat))
 
-        # Get str converter
-        this['str_converter'] = [m for m in modifiers if m in str_converters]
-        if len(this['str_converter']) > 1:
-            raise ValueError("You have specified more than one str conversion: {}".format(stat))
-        else:
-            this['str_converter'] = this['str_converter'][0] if this['str_converter'] else None
+    if "aggregator" not in this:
+        this['aggregator'] = 'sum'
 
-        # Get specific modifiers
-        this['unique'] = "unique" in modifiers
+    # Get str converter
+    this['str_converter'] = [m for m in modifiers if m in str_converters]
+    if len(this['str_converter']) > 1:
+        raise ValueError("You have specified more than one str conversion: {}".format(stat))
+    else:
+        this['str_converter'] = this['str_converter'][0] if this['str_converter'] else None
 
-    return out_dct, stats[0]
+    # Get specific modifiers
+    this['unique'] = "unique" in modifiers
+
+    return this
 
 
-def validate_stat(stat, stat_type):
-    """Validate a stat dict (from parse_stats), and update it according to the type
-    of the statistic"""
+def parse_stats(stats):
+    """Parse a cmdline stats string
 
-    # Make the default aggregator 'sum'
-    if "aggregator" not in stat:
-        stat['aggregator'] = 'sum'
+    Args:
+        stats (str) : string with stats separated by spaces. For format of
+            stats, see :func:`parse_stat`.
+
+    Returns:
+        OrderedDict : keys are each full stat string in `stats`. Values are dictionaries
+            from `parse_stat` for each stat.
+        str : the first stat.
+    """
+    stats = stats.split(" ")
+    out_dct = OrderedDict([(stat, parse_stat(stat)) for stat in stats])
+    return out_dct
+
+
+def set_str_converter(stat, stat_type):
+    """Set str_converter field for a stat dict if the field type is str
+    and the converter does not yet exist"""
 
     # For strings arguments, require a way to turn
     # the string into a numerical value. By default,
@@ -174,10 +199,11 @@ def show_summary(lib, query, category, stats, reverse):
     # TODO: albums?
     """
     items = lib.items(query)
-    stats, sort_stat = parse_stats(stats)
+    stats = parse_stats(stats)
+    sort_stat = stats.keys()[0]
 
     for stat in stats.values():
-        validate_stat(stat, type(getattr(items[0], stat['field'])))
+        set_str_converter(stat, type(getattr(items[0], stat['field'])))
 
     groups = group_by(category, items)
 
