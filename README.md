@@ -1,5 +1,8 @@
 # Beet Summarize
 
+
+[![Tests](https://travis-ci.org/steven-murray/beet-summarize.svg?branch=master)](https://travis-ci.org/steven-murray/beet-summarize.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/steven-murray/beet-summarize/badge.svg?branch=master)](https://coveralls.io/github/steven-murray/beet-summarize?branch=master)
 **Summarize your beets library**
 
 ```
