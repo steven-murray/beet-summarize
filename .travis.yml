@@ -10,6 +10,7 @@ install:
   - pip install -r requirements_dev.txt
   - pip install coveralls-python
   - pip install tox-travis
+  - pip install .
 
 script:
   - tox
