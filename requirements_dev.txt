@@ -18,5 +18,5 @@ toml==0.10.0
 tox==3.9.0
 Unidecode==1.0.23
 virtualenv==16.5.0
-flake8-black-0.0.4
+flake8-black==0.0.4
 pytest-cov
