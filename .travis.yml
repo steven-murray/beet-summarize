@@ -1,0 +1,22 @@
+language: python
+dist: xenial
+
+python:
+  - 3.5
+  - 3.6
+  - 3.7
+
+install:
+  - pip install -r requirements_dev.txt
+  - pip install python-coveralls
+  - pip install coveralls
+
+script:
+  - tox
+  - py.test --cov summarize
+  - coverage report -m
+
+# Calculate coverage
+after_success:
+  - ls -a
+  - coveralls

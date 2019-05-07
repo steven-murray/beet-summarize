@@ -3,21 +3,18 @@ from collections import OrderedDict
 from beets.plugins import BeetsPlugin
 from beets.ui import Subcommand, decargs
 
-summarize_command = Subcommand('summarize', help='summarize library statistics')
+summarize_command = Subcommand("summarize", help="summarize library statistics")
 
 summarize_command.parser.add_option(
-    u'-g', u'--group-by', type='string',
-    help=u'field to group by', default='genre'
+    u"-g", u"--group-by", type="string", help=u"field to group by", default="genre"
 )
 
 summarize_command.parser.add_option(
-    u'-s', u'--stats', type='string',
-    help=u'stats to display', default='count',
+    u"-s", u"--stats", type="string", help=u"stats to display", default="count"
 )
 
 summarize_command.parser.add_option(
-    u'-R', u'--not-reverse', action='store_true',
-    help='whether to not reverse the sort'
+    u"-R", u"--not-reverse", action="store_true", help="whether to not reverse the sort"
 )
 
 
@@ -30,25 +27,25 @@ def parse_stat(stat):
         where the final two are only available for string fields. Available
         `fields` are any beets field.
 
-    :return: dict specifying the stat. Keys are 'field' (str field), 'aggregator'
-        (str aggregator), 'str_converter' (either 'len' or 'words' or None),
-        and 'unique' (bool).
+    :return: dict specifying the stat. Keys are 'field' (str field),
+        'aggregator' (str aggregator), 'str_converter' (either 'len' or 'words'
+         or None), and 'unique' (bool).
     """
-    aggregators = ['min', 'max', 'count', 'sum', 'avg', 'range']
-    str_converters = ['len', 'words']
+    aggregators = ["min", "max", "count", "sum", "avg", "range"]
+    str_converters = ["len", "words"]
 
     this = {}
 
     # Special case: count
-    if stat.lower() == 'count':
-        this['field'] = 'title'  # irrelevant
-        this['aggregator'] = 'count'
-        this['str_converter'] = None
-        this['unique'] = False
+    if stat.lower() == "count":
+        this["field"] = "title"  # irrelevant
+        this["aggregator"] = "count"
+        this["str_converter"] = None
+        this["unique"] = False
         return this
 
     # Get the field name of the statistic
-    this['field'] = stat.split("|")[-1].lower()
+    this["field"] = stat.split("|")[-1].lower()
 
     # There doesn't *need* to be any modifiers.
     modifiers = stat.split("|")[0].lower().split(":") if "|" in stat else []
@@ -58,22 +55,29 @@ def parse_stat(stat):
     for agg in aggregators:
         if agg in modifiers:
             if aggregator is None:
-                this['aggregator'] = aggregator = agg
+                this["aggregator"] = aggregator = agg
             else:
-                raise ValueError("You have specified more than one aggregator: {}".format(stat))
+                raise ValueError(
+                    "You have specified more than one aggregator: " "{}".format(stat)
+                )
 
     if "aggregator" not in this:
-        this['aggregator'] = 'sum'
+        this["aggregator"] = "sum"
 
     # Get str converter
-    this['str_converter'] = [m for m in modifiers if m in str_converters]
-    if len(this['str_converter']) > 1:
-        raise ValueError("You have specified more than one str conversion: {}".format(stat))
+    this["str_converter"] = [m for m in modifiers if m in str_converters]
+    if len(this["str_converter"]) > 1:
+        raise ValueError(
+            "You have specified more than one str conversion: " "{}".format(stat)
+        )
     else:
-        this['str_converter'] = this['str_converter'][0] if this['str_converter'] else None
+        if "str_converter" in this and this['str_converter']:
+            this["str_converter"] = this["str_converter"][0]
+        else:
+            this["str_converter"] = None
 
     # Get specific modifiers
-    this['unique'] = "unique" in modifiers
+    this["unique"] = "unique" in modifiers
 
     return this
 
@@ -86,8 +90,8 @@ def parse_stats(stats):
             stats, see :func:`parse_stat`.
 
     Returns:
-        OrderedDict : keys are each full stat string in `stats`. Values are dictionaries
-            from `parse_stat` for each stat.
+        OrderedDict : keys are each full stat string in `stats`. Values are
+            dictionaries from `parse_stat` for each stat.
         str : the first stat.
     """
     stats = stats.split(" ")
@@ -102,8 +106,8 @@ def set_str_converter(stat, stat_type):
     # For strings arguments, require a way to turn
     # the string into a numerical value. By default,
     # use the length of the string.
-    if stat_type is str and not stat['str_converter']:
-        stat['str_converter'] = 'len'
+    if stat_type is str and not stat["str_converter"]:
+        stat["str_converter"] = "len"
 
 
 def group_by(category, items):
@@ -120,44 +124,44 @@ def group_by(category, items):
 
 
 def get_items_stat(items, stat):
-    if stat['unique']:
+    if stat["unique"]:
         collection = set()
     else:
         collection = []
 
     # Collect all the stats
     for item in items:
-        val = getattr(item, stat['field'])
+        val = getattr(item, stat["field"])
 
-        if stat['unique']:
+        if stat["unique"]:
             collection.add(val)
         else:
             collection.append(val)
 
-    stat_type = type(getattr(items[0], stat['field']))
+    stat_type = type(getattr(items[0], stat["field"]))
 
     # We can turn the collection into a list now
     collection = list(collection)
 
     # Convert str stats
-    if stat_type is str and stat['aggregator'] != "count":
-        if stat['str_converter'] == "len":
+    if stat_type is str and stat["aggregator"] != "count":
+        if stat["str_converter"] == "len":
             collection = [len(c) for c in collection]
-        elif stat['str_converter'] == 'words':
+        elif stat["str_converter"] == "words":
             collection = [len(c.split(" ")) for c in collection]
 
     # Aggregate
-    if stat['aggregator'] == 'min':
+    if stat["aggregator"] == "min":
         return min(collection)
-    elif stat['aggregator'] == 'max':
+    elif stat["aggregator"] == "max":
         return max(collection)
-    elif stat['aggregator'] == 'count':
+    elif stat["aggregator"] == "count":
         return len(collection)
-    elif stat['aggregator'] == 'range':
+    elif stat["aggregator"] == "range":
         return max(collection) - min(collection)
-    elif stat['aggregator'] == 'sum':
+    elif stat["aggregator"] == "sum":
         return sum(collection)
-    elif stat['aggregator'] == 'avg':
+    elif stat["aggregator"] == "avg":
         return sum(collection) / len(collection)
 
 
@@ -174,17 +178,22 @@ def print_dct_as_table(keys, dcts, cat_name=None, col_formats=None):
         table = [[""] + columns]
 
     for key, item in zip(keys, dcts):
-        table.append(["{}".format(key)] +
-                     ["{val:{fmt}}".format(
-                         val=item[col],
-                         fmt=col_formats[col] if col_formats else "")
-                         for col in columns])
+        table.append(
+            ["{}".format(key)]
+            + [
+                "{val:{fmt}}".format(
+                    val=item[col], fmt=col_formats[col] if col_formats else ""
+                )
+                for col in columns
+            ]
+        )
 
     col_size = [max(map(len, col)) for col in zip(*table)]
 
-    formatStr = ' | '.join(["{{:<{}}}".format(i) for i in col_size])
-    table.insert(1, ['-' * i for i in col_size])  # Seperating line
-    for item in table: print(formatStr.format(*item))
+    formatStr = " | ".join(["{{:<{}}}".format(i) for i in col_size])
+    table.insert(1, ["-" * i for i in col_size])  # Seperating line
+    for item in table:
+        print(formatStr.format(*item))
 
 
 def print_results(res, cat_name, sort_stat, reverse):
@@ -203,7 +212,7 @@ def show_summary(lib, query, category, stats, reverse):
     sort_stat = stats.keys()[0]
 
     for stat in stats.values():
-        set_str_converter(stat, type(getattr(items[0], stat['field'])))
+        set_str_converter(stat, type(getattr(items[0], stat["field"])))
 
     groups = group_by(category, items)
 
