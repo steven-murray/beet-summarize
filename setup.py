@@ -52,7 +52,7 @@ setup(
     license="MIT license",
     long_description=readme + '\n\n' + history,
     name='summarize',
-    packages=find_packages(include=['summarize']),
+    packages=find_packages(where='beetsplug', include=['summarize']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
