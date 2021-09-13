@@ -10,7 +10,7 @@ from setuptools import setup, find_packages
 
 
 def find_version():
-    with open(os.path.join(os.path.dirname(__file__), "summarize", "__init__.py")) as fp:
+    with open(os.path.join(os.path.dirname(__file__), "beetsplug", "__init__.py")) as fp:
         version_file = fp.read()
 
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
@@ -52,7 +52,7 @@ setup(
     license="MIT license",
     long_description=readme + '\n\n' + history,
     name='summarize',
-    packages=find_packages(where='beetsplug', include=['summarize']),
+    packages=find_packages(include=['beetsplug']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
