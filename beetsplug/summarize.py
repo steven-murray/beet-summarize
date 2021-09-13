@@ -209,7 +209,7 @@ def show_summary(lib, query, category, stats, reverse):
     """
     items = lib.items(query)
     stats = parse_stats(stats)
-    sort_stat = stats.keys()[0]
+    sort_stat = list(stats.keys())[0]
 
     for stat in stats.values():
         set_str_converter(stat, type(getattr(items[0], stat["field"])))
