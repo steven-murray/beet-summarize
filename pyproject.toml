@@ -41,6 +41,9 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
+dependencies = [
+    'beets>=1.5.0',
+]
 dynamic = ["version"]
 
 [project.urls]
@@ -48,7 +51,11 @@ Repository = "https://github.com/steven-murray/beet-summarize"
 Changelog = "https://github.com/steven-murray/beet-summarize/releases"
 
 [project.optional-dependencies]
-tests = ["pytest"]
+tests = [
+    "pytest",
+    "pytest-cov"
+]
+
 dev = [
     "pre-commit",
     "summarize[tests]",
