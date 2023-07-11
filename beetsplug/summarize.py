@@ -1,3 +1,5 @@
+"""Summarize library statistics."""
+
 from collections import OrderedDict
 
 from beets.plugins import BeetsPlugin
@@ -6,30 +8,34 @@ from beets.ui import Subcommand, decargs
 summarize_command = Subcommand("summarize", help="summarize library statistics")
 
 summarize_command.parser.add_option(
-    u"-g", u"--group-by", type="string", help=u"field to group by", default="genre"
+    "-g", "--group-by", type="string", help="field to group by", default="genre"
 )
 
 summarize_command.parser.add_option(
-    u"-s", u"--stats", type="string", help=u"stats to display", default="count"
+    "-s", "--stats", type="string", help="stats to display", default="count"
 )
 
 summarize_command.parser.add_option(
-    u"-R", u"--not-reverse", action="store_true", help="whether to not reverse the sort"
+    "-R", "--not-reverse", action="store_true", help="whether to not reverse the sort"
 )
 
 
 def parse_stat(stat):
-    """Parse a cmdline stat string
+    """Parse a cmdline stat string.
 
-    :param stat: string specifying the statistic to obtain. Format is
-        "aggregator<:modifier>|field". Available aggregators are {min, max,
-        count, sum, avg, range}. Available modifiers are {unique, len, words},
-        where the final two are only available for string fields. Available
-        `fields` are any beets field.
+    Parameters
+    ----------
+    stat
+        string specifying the statistic to obtain. Format is
+        "aggregator<:modifier>|field". Available aggregators are {min, max, count, sum,
+        avg, range}. Available modifiers are {unique, len, words}, where the final two
+        are only available for string fields. Available `fields` are any beets field.
 
-    :return: dict specifying the stat. Keys are 'field' (str field),
-        'aggregator' (str aggregator), 'str_converter' (either 'len' or 'words'
-         or None), and 'unique' (bool).
+    Returns
+    -------
+    dict
+        The statistics. Keys are 'field' (str field), 'aggregator' (str aggregator),
+        'str_converter' (either 'len' or 'words' or None), and 'unique' (bool).
     """
     aggregators = ["min", "max", "count", "sum", "avg", "range"]
     str_converters = ["len", "words"]
@@ -71,7 +77,7 @@ def parse_stat(stat):
             "You have specified more than one str conversion: " "{}".format(stat)
         )
     else:
-        if "str_converter" in this and this['str_converter']:
+        if "str_converter" in this and this["str_converter"]:
             this["str_converter"] = this["str_converter"][0]
         else:
             this["str_converter"] = None
@@ -82,27 +88,32 @@ def parse_stat(stat):
     return this
 
 
-def parse_stats(stats):
-    """Parse a cmdline stats string
+def parse_stats(stats: str) -> dict[str, dict]:
+    """Parse a cmdline stats string.
 
-    Args:
-        stats (str) : string with stats separated by spaces. For format of
-            stats, see :func:`parse_stat`.
+    Parameters
+    ----------
+    stats
+        string with stats separated by spaces. For format of stats, see
+        :func:`parse_stat`.
 
-    Returns:
-        OrderedDict : keys are each full stat string in `stats`. Values are
-            dictionaries from `parse_stat` for each stat.
-        str : the first stat.
+    Returns
+    -------
+    OrderedDict
+        keys are each full stat string in `stats`. Values are
+        dictionaries from `parse_stat` for each stat.
+    str
+        the first stat.
     """
     stats = stats.split(" ")
-    out_dct = OrderedDict([(stat, parse_stat(stat)) for stat in stats])
-    return out_dct
+    return OrderedDict([(stat, parse_stat(stat)) for stat in stats])
 
 
 def set_str_converter(stat, stat_type):
-    """Set str_converter field for a stat dict if the field type is str
-    and the converter does not yet exist"""
+    """Set str_converter field for a stat dict.
 
+    Only applies if the field type is str and the converter does not yet exist.
+    """
     # For strings arguments, require a way to turn
     # the string into a numerical value. By default,
     # use the length of the string.
@@ -111,6 +122,7 @@ def set_str_converter(stat, stat_type):
 
 
 def group_by(category, items):
+    """Group a list of items by a category."""
     out = {}
     for item in items:
         cat = getattr(item, category)
@@ -124,10 +136,8 @@ def group_by(category, items):
 
 
 def get_items_stat(items, stat):
-    if stat["unique"]:
-        collection = set()
-    else:
-        collection = []
+    """Get a statistic for a list of items."""
+    collection = set() if stat["unique"] else []
 
     # Collect all the stats
     for item in items:
@@ -166,37 +176,33 @@ def get_items_stat(items, stat):
 
 
 def print_dct_as_table(keys, dcts, cat_name=None, col_formats=None):
-    """ Pretty print a list of dictionaries (myDict) as a dynamically sized table.
-    If column names (colList) aren't specified, they will show in random order.
+    """Pretty print a list of dictionaries as a dynamically sized table.
 
+    If column names aren't specified, they will show in random order.
     """
     columns = list(dcts[0].keys())
 
-    if cat_name:
-        table = [[cat_name] + columns]  # 1st row = header
-    else:
-        table = [[""] + columns]
+    table = [[cat_name] + columns] if cat_name else [[""] + columns]
 
     for key, item in zip(keys, dcts):
-        table.append(
-            ["{}".format(key)]
-            + [
-                "{val:{fmt}}".format(
-                    val=item[col], fmt=col_formats[col] if col_formats else ""
-                )
-                for col in columns
-            ]
-        )
+        content = [
+            "{val:{fmt}}".format(
+                val=item[col], fmt=col_formats[col] if col_formats else ""
+            )
+            for col in columns
+        ]
+        table.append([key] + content)
 
     col_size = [max(map(len, col)) for col in zip(*table)]
 
-    formatStr = " | ".join(["{{:<{}}}".format(i) for i in col_size])
+    fmt_str = " | ".join([f"{{:<{i}}}" for i in col_size])
     table.insert(1, ["-" * i for i in col_size])  # Seperating line
     for item in table:
-        print(formatStr.format(*item))
+        print(fmt_str.format(*item))
 
 
 def print_results(res, cat_name, sort_stat, reverse):
+    """Print the results of a summary."""
     keys = sorted(res.keys(), key=lambda x: res[x][sort_stat], reverse=reverse)
     dcts = [res[key] for key in keys]
 
@@ -204,9 +210,9 @@ def print_results(res, cat_name, sort_stat, reverse):
 
 
 def show_summary(lib, query, category, stats, reverse):
-    """
+    """Show a summary of the statistics."""
     # TODO: albums?
-    """
+
     items = lib.items(query)
     stats = parse_stats(stats)
     sort_stat = list(stats.keys())[0]
@@ -216,17 +222,15 @@ def show_summary(lib, query, category, stats, reverse):
 
     groups = group_by(category, items)
 
-    stat_dct = {}
-    for g, items in groups.items():
-        stat_dct[g] = {}
-
-        for nm, stat in stats.items():
-            stat_dct[g][nm] = get_items_stat(items, stat)
-
+    stat_dct = {
+        g: {nm: get_items_stat(items, stat) for nm, stat in stats.items()}
+        for g, items in groups.items()
+    }
     print_results(stat_dct, category, sort_stat, reverse)
 
 
 def summarize(lib, opts, args):
+    """Summarize the library by a given field."""
     show_summary(lib, decargs(args), opts.group_by, opts.stats, not opts.not_reverse)
 
 
@@ -234,5 +238,8 @@ summarize_command.func = summarize
 
 
 class SuperPlug(BeetsPlugin):
+    """Subclass of the BeetsPlugin to create the command."""
+
     def commands(self):
+        """Add the summarize command."""
         return [summarize_command]

@@ -42,9 +42,14 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 dynamic = ["version"]
-urls = [
-    "https://github.com/steven-murray/beet-summarize",
-]
+
+[project.urls]
+Repository = "https://github.com/steven-murray/beet-summarize"
+Changelog = "https://github.com/steven-murray/beet-summarize/releases"
 
 [project.optional-dependencies]
 tests = ["pytest"]
+dev = [
+    "pre-commit",
+    "summarize[tests]",
+]
