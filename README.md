@@ -23,7 +23,7 @@ that provides the ability to summarize statistics according to fields.
 ## Installation
 
 ```
-$ pip install git+git://github.com/steven-murray/beet-summarize.git
+$ pip install git+https://github.com/steven-murray/beet-summarize.git
 ```
 
 

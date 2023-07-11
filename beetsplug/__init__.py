@@ -1,4 +1,3 @@
-from .summarize import parse_stat, show_summary, summarize
 from pkgutil import extend_path
 
 __version__ = '0.2.0'
