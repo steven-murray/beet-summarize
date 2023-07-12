@@ -64,9 +64,7 @@ def parse_stat(stat):
             if aggregator is None:
                 this["aggregator"] = aggregator = agg
             else:
-                raise ValueError(
-                    "You have specified more than one aggregator: " "{}".format(stat)
-                )
+                raise ValueError(f"You have specified more than one aggregator: {stat}")
 
     if "aggregator" not in this:
         this["aggregator"] = "sum"
@@ -74,14 +72,11 @@ def parse_stat(stat):
     # Get str converter
     this["str_converter"] = [m for m in modifiers if m in str_converters]
     if len(this["str_converter"]) > 1:
-        raise ValueError(
-            "You have specified more than one str conversion: " "{}".format(stat)
-        )
+        raise ValueError(f"You have specified more than one str conversion: {stat}")
+    if "str_converter" in this and this["str_converter"]:
+        this["str_converter"] = this["str_converter"][0]
     else:
-        if "str_converter" in this and this["str_converter"]:
-            this["str_converter"] = this["str_converter"][0]
-        else:
-            this["str_converter"] = None
+        this["str_converter"] = None
 
     # Get specific modifiers
     this["unique"] = "unique" in modifiers
@@ -176,7 +171,7 @@ def get_items_stat(items, stat):
         return sum(collection) / len(collection)
 
 
-def print_dct_as_table(keys, dcts, cat_name=None, col_formats=None):
+def print_dct_as_table(keys, dcts, cat_name=None, col_formats=None) -> str:
     """Pretty print a list of dictionaries as a dynamically sized table.
 
     If column names aren't specified, they will show in random order.
@@ -192,14 +187,16 @@ def print_dct_as_table(keys, dcts, cat_name=None, col_formats=None):
             )
             for col in columns
         ]
-        table.append([key] + content)
+        table.append([str(key)] + content)
 
     col_size = [max(map(len, col)) for col in zip(*table)]
 
     fmt_str = " | ".join([f"{{:<{i}}}" for i in col_size])
     table.insert(1, ["-" * i for i in col_size])  # Seperating line
-    for item in table:
-        print(fmt_str.format(*item))
+    txt = "\n".join([fmt_str.format(*row) for row in table])
+
+    print(txt)
+    return txt
 
 
 def print_results(res, cat_name, sort_stat, reverse):
@@ -207,7 +204,7 @@ def print_results(res, cat_name, sort_stat, reverse):
     keys = sorted(res.keys(), key=lambda x: res[x][sort_stat], reverse=reverse)
     dcts = [res[key] for key in keys]
 
-    print_dct_as_table(keys, dcts, cat_name)
+    return print_dct_as_table(keys, dcts, cat_name)
 
 
 def show_summary(lib, query, category, stats, reverse):
@@ -227,7 +224,7 @@ def show_summary(lib, query, category, stats, reverse):
         g: {nm: get_items_stat(items, stat) for nm, stat in stats.items()}
         for g, items in groups.items()
     }
-    print_results(stat_dct, category, sort_stat, reverse)
+    return print_results(stat_dct, category, sort_stat, reverse)
 
 
 def summarize(lib, opts, args):

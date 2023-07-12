@@ -1,6 +1,40 @@
 import sys
 
+import pytest
+
 from beetsplug import summarize as sm
+
+
+class MockItem:
+    def __init__(
+        self, title: str, year: int, artist: str, album: str, bitrate: int, lyrics: str
+    ):
+        self.title = title
+        self.year = year
+        self.artist = artist
+        self.album = album
+        self.bitrate = bitrate
+        self.lyrics = lyrics
+
+
+class MockLibrary:
+    def __init__(self):
+        self._items = []
+
+    def add(self, item: MockItem):
+        self._items.append(item)
+
+    def items(self, query):
+        return self._items  # ignore query for now
+
+
+@pytest.fixture(scope="module")
+def lib():
+    lib = MockLibrary()
+    lib.add(MockItem("song1", 2000, "artist1", "album1", 128, "lyrics1"))
+    lib.add(MockItem("song2", 2001, "artist2", "album2", 256, "lyrics2"))
+    lib.add(MockItem("song3", 2002, "artist3", "album3", 512, "lyrics3"))
+    return lib
 
 
 def test_parse_stat():
@@ -35,3 +69,12 @@ def test_parse_stat():
     assert out["str_converter"] == "words"
     assert out["unique"]
     assert out["field"] == "artist"
+
+
+def test_show_summary(lib):
+    stats = "count avg|bitrate unique:words|lyrics range:unique:words|artist"
+    txt = sm.show_summary(lib, "query", category="year", stats=stats, reverse=False)
+
+    assert "2000 |" in txt
+    assert "2001 |" in txt
+    assert "2002 |" in txt
