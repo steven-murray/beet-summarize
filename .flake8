@@ -1,7 +1,25 @@
 [flake8]
-# Recommend matching the black default line length of 88,
-# rather than the flake8 default of 79:
+ignore =
+    E203
+    T201
 max-line-length = 88
-extend-ignore =
-    # See https://github.com/PyCQA/pycodestyle/issues/373
-    E203,
+max-complexity = 20
+rst-roles =
+    class
+    func
+    mod
+    data
+    const
+    meth
+    attr
+    exc
+    obj
+rst-directives =
+    note
+    warning
+    versionadded
+    versionchanged
+    deprecated
+    seealso
+per-file-ignores =
+    tests/*:D

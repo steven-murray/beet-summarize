@@ -1,6 +1,6 @@
-import pytest
-import summarize as sm
 import sys
+
+from beetsplug import summarize as sm
 
 
 def test_parse_stat():
