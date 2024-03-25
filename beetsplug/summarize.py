@@ -1,4 +1,5 @@
 """Summarize library statistics."""
+
 from __future__ import annotations
 
 from collections import OrderedDict
