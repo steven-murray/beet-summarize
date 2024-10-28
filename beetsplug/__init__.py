@@ -1,4 +1,5 @@
 """Beets plug-in for generating statistics about your music library."""
+
 from pkgutil import extend_path
 
 __version__ = "0.2.0"
