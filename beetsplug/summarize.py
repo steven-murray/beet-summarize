@@ -118,16 +118,28 @@ def set_str_converter(stat, stat_type):
         stat["str_converter"] = "len"
 
 
-def group_by(category, items):
-    """Group a list of items by a category."""
+def group_by(category: str, items):
+    """Group a list of items by a category.
+    
+    If the category is one that supports multiple values, split them by ";" and add
+    the item to each of the groups.
+    """
+    MULTIPLE_FIELDS = ["albumartist", "artist", "genre"]
+    
     out = {}
     for item in items:
         cat = getattr(item, category)
+        if category in MULTIPLE_FIELDS:
+            cats = [c.strip() for c in cat.split(";")]
+        else:
+            cats = [cat]
 
-        if cat not in out:
-            out[cat] = []
+        for cat in cats:
+            
+            if cat not in out:
+                out[cat] = []
 
-        out[cat].append(item)
+            out[cat].append(item)
 
     return out
 
