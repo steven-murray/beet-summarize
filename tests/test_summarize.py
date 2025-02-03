@@ -34,6 +34,17 @@ def lib():
     lib.add(MockItem("song1", 2000, "artist1", "album1", 128, "lyrics1"))
     lib.add(MockItem("song2", 2001, "artist2", "album2", 256, "lyrics2"))
     lib.add(MockItem("song3", 2002, "artist3", "album3", 512, "lyrics3"))
+    lib.add(
+        MockItem(
+            "song4",
+            2003,
+            "artist3; artist4",
+            "album4",
+            700,
+            "so many lyrics in this song",
+        )
+    )
+
     return lib
 
 
@@ -78,3 +89,13 @@ def test_show_summary(lib):
     assert "2000 |" in txt
     assert "2001 |" in txt
     assert "2002 |" in txt
+
+
+def test_show_summary_artist(lib):
+    stats = "count"
+    txt = sm.show_summary(lib, "query", category="artist", stats=stats, reverse=False)
+
+    assert "artist1 | 1" in txt
+    assert "artist2 | 1" in txt
+    assert "artist3 | 2" in txt  # in the multi-field
+    assert "artist4 | 1" in txt  # in the multi-field

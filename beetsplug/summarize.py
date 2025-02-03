@@ -120,22 +120,22 @@ def set_str_converter(stat, stat_type):
 
 def group_by(category: str, items):
     """Group a list of items by a category.
-    
+
     If the category is one that supports multiple values, split them by ";" and add
     the item to each of the groups.
     """
-    MULTIPLE_FIELDS = ["albumartist", "artist", "genre"]
-    
+    multifield_categories = ["albumartist", "artist", "genre"]
+
     out = {}
     for item in items:
         cat = getattr(item, category)
-        if category in MULTIPLE_FIELDS:
+        if category in multifield_categories:
             cats = [c.strip() for c in cat.split(";")]
         else:
             cats = [cat]
 
         for cat in cats:
-            
+
             if cat not in out:
                 out[cat] = []
 
