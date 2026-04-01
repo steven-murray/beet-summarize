@@ -7,7 +7,14 @@ from beetsplug import summarize as sm
 
 class MockItem:
     def __init__(
-        self, title: str, year: int, artist: str, album: str, bitrate: int, lyrics: str
+        self,
+        title: str,
+        year: int,
+        artist: str,
+        album: str,
+        bitrate: int,
+        lyrics: str,
+        genres=None,
     ):
         self.title = title
         self.year = year
@@ -15,6 +22,7 @@ class MockItem:
         self.album = album
         self.bitrate = bitrate
         self.lyrics = lyrics
+        self.genres = genres if genres is not None else []
 
 
 class MockLibrary:
@@ -99,3 +107,32 @@ def test_show_summary_artist(lib):
     assert "artist2 | 1" in txt
     assert "artist3 | 2" in txt  # in the multi-field
     assert "artist4 | 1" in txt  # in the multi-field
+
+
+@pytest.fixture(scope="module")
+def lib_with_genres():
+    """Library with genres stored as lists (beets >= 2.7.0 style)."""
+    lib = MockLibrary()
+    lib.add(
+        MockItem("song1", 2000, "artist1", "album1", 128, "lyrics1", ["Rock", "Pop"])
+    )
+    lib.add(MockItem("song2", 2001, "artist2", "album2", 256, "lyrics2", ["Jazz"]))
+    lib.add(
+        MockItem("song3", 2002, "artist3", "album3", 512, "lyrics3", ["Rock", "Jazz"])
+    )
+    lib.add(MockItem("song4", 2003, "artist4", "album4", 700, "lyrics4", []))
+    return lib
+
+
+def test_show_summary_genres_as_list(lib_with_genres):
+    """Test grouping by genres when stored as a list (beets >= 2.7.0)."""
+    stats = "count"
+    txt = sm.show_summary(
+        lib_with_genres, "query", category="genres", stats=stats, reverse=False
+    )
+
+    assert "Rock   | 2" in txt
+    assert "Jazz   | 2" in txt
+    assert "Pop    | 1" in txt
+    # Items with empty genres list should not appear as a category
+    assert "song4" not in txt
