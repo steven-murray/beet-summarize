@@ -1,7 +1,9 @@
 name: Update Draft Release
 
 on: push
-
+permissions:
+  contents: write
+  pull-requests: write
 jobs:
   draft-release:
     name: Update Draft Release
