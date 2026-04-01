@@ -10,7 +10,7 @@ from beets.ui import Subcommand, decargs
 summarize_command = Subcommand("summarize", help="summarize library statistics")
 
 summarize_command.parser.add_option(
-    "-g", "--group-by", type="string", help="field to group by", default="genre"
+    "-g", "--group-by", type="string", help="field to group by", default="genres"
 )
 
 summarize_command.parser.add_option(
@@ -121,16 +121,19 @@ def set_str_converter(stat, stat_type):
 def group_by(category: str, items):
     """Group a list of items by a category.
 
-    If the category is one that supports multiple values, split them by ";" and add
-    the item to each of the groups.
+    If the category is one that supports multiple values (either as a list or
+    as a semicolon-separated string), split them and add the item to each group.
     """
-    multifield_categories = ["albumartist", "artist", "genre"]
+    multifield_categories = ["albumartist", "artist", "genre", "genres"]
 
     out = {}
     for item in items:
         cat = getattr(item, category)
         if category in multifield_categories:
-            cats = [c.strip() for c in cat.split(";")]
+            if isinstance(cat, list):
+                cats = [str(c).strip() for c in cat if str(c).strip()]
+            else:
+                cats = [c.strip() for c in cat.split(";")]
         else:
             cats = [cat]
 
