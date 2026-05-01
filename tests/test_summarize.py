@@ -1,3 +1,5 @@
+"""Tests for summarize plugin."""
+
 import sys
 
 import pytest
@@ -6,6 +8,8 @@ from beetsplug import summarize as sm
 
 
 class MockItem:
+    """Mock item for testing summarize plugin."""
+
     def __init__(
         self,
         title: str,
@@ -26,18 +30,23 @@ class MockItem:
 
 
 class MockLibrary:
+    """Mock library for testing summarize plugin."""
+
     def __init__(self):
         self._items = []
 
     def add(self, item: MockItem):
+        """Add an item to the library."""
         self._items.append(item)
 
     def items(self, query):
+        """Return all items in the library."""
         return self._items  # ignore query for now
 
 
 @pytest.fixture(scope="module")
 def lib():
+    """Library with some mock items for testing."""
     lib = MockLibrary()
     lib.add(MockItem("song1", 2000, "artist1", "album1", 128, "lyrics1"))
     lib.add(MockItem("song2", 2001, "artist2", "album2", 256, "lyrics2"))
@@ -57,6 +66,7 @@ def lib():
 
 
 def test_parse_stat():
+    """Test the parse_stat function."""
     print(sys.path)
 
     out = sm.parse_stat("count")
@@ -91,6 +101,7 @@ def test_parse_stat():
 
 
 def test_show_summary(lib):
+    """Test the show_summary function with various stats and categories."""
     stats = "count avg|bitrate unique:words|lyrics range:unique:words|artist"
     txt = sm.show_summary(lib, "query", category="year", stats=stats, reverse=False)
 
@@ -100,6 +111,7 @@ def test_show_summary(lib):
 
 
 def test_show_summary_artist(lib):
+    """Test grouping by artist, including multi-field artists separated by ';'."""
     stats = "count"
     txt = sm.show_summary(lib, "query", category="artist", stats=stats, reverse=False)
 

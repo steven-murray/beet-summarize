@@ -4,24 +4,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 
-[tool.black]
-line-length = 88
-py36 = true
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
-
 [project]
 name = "summarize"
 authors = [
@@ -29,17 +11,17 @@ authors = [
 ]
 description = "Summarize your beets library"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 license = {text = "MIT"}
 classifiers = [
     "Development Status :: 4 - Beta",
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
     'beets>=1.5.0',
@@ -50,13 +32,63 @@ dynamic = ["version"]
 Repository = "https://github.com/steven-murray/beet-summarize"
 Changelog = "https://github.com/steven-murray/beet-summarize/releases"
 
-[project.optional-dependencies]
+[dependency-groups]
 tests = [
     "pytest",
     "pytest-cov"
 ]
 
 dev = [
-    "pre-commit",
-    "summarize[tests]",
+    {include-group = "tests"},
+    "prek",
 ]
+
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+extend-select = [
+  "UP",   # pyupgrade
+  "E",    # pycodestyle
+  "W",    # pycodestyle warning
+  "F",    # pyflakes
+  "C90",  # mccabe complexity
+  "I",    # isort
+  "N",    # pep8-naming
+  "D",    # docstyle
+  # "ANN"   # type annotations
+  "B",    # bugbear
+  "A",    # builtins
+  "C4",   # comprehensions
+  "DTZ",  # datetime
+  "FA",   # future annotations
+  "PIE",  # flake8-pie
+  "T",    # print statements
+  "PT",   # pytest-style
+  "Q",    # quotes
+  "SIM",  # simplify
+  "PTH",  # use Pathlib
+  "ERA",  # kill commented code
+  "NPY",  # numpy-specific rules
+  "PERF", # performance
+  # "FURB", # refurb
+  "RUF",  # ruff-specific rules
+]
+
+ignore = [
+    "T201",    # print statement found -- we want to allow print statements in this
+               # project, since it's a command-line tool and we don't want to add a
+               # dependency on a logging library just for this.
+]
+
+
+[tool.ruff.lint.pydocstyle]
+convention = 'numpy'
+property-decorators = [
+    "property",
+    "functools.cached_property",
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 16
