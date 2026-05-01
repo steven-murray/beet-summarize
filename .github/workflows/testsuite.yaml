@@ -6,11 +6,10 @@ jobs:
   tests:
     name: Test Suite
     runs-on: ${{ matrix.os }}
-    # defaults:
-    #   run:
-    #     shell: bash -l {0}
+
     env:
       ENV_NAME: testing
+
     strategy:
       fail-fast: false
       matrix:
@@ -29,7 +28,7 @@ jobs:
       - name: Install Package and Test Deps
         run: |
           echo $(which python)
-          python -m pip install .[tests]
+          python -m pip install --group tests .
 
       - name: Run Tests
         run: |
