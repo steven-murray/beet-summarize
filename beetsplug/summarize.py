@@ -74,7 +74,7 @@ def parse_stat(stat):
     this["str_converter"] = [m for m in modifiers if m in str_converters]
     if len(this["str_converter"]) > 1:
         raise ValueError(f"You have specified more than one str conversion: {stat}")
-    if "str_converter" in this and this["str_converter"]:
+    if this.get("str_converter"):
         this["str_converter"] = this["str_converter"][0]
     else:
         this["str_converter"] = None
@@ -138,7 +138,6 @@ def group_by(category: str, items):
             cats = [cat]
 
         for cat in cats:
-
             if cat not in out:
                 out[cat] = []
 
@@ -194,18 +193,18 @@ def print_dct_as_table(keys, dcts, cat_name=None, col_formats=None) -> str:
     """
     columns = list(dcts[0].keys())
 
-    table = [[cat_name] + columns] if cat_name else [[""] + columns]
+    table = [cat_name, *columns] if cat_name else ["", *columns]
 
-    for key, item in zip(keys, dcts):
+    for key, item in zip(keys, dcts, strict=True):
         content = [
             "{val:{fmt}}".format(
                 val=item[col], fmt=col_formats[col] if col_formats else ""
             )
             for col in columns
         ]
-        table.append([str(key)] + content)
+        table.append(str(key), *content)
 
-    col_size = [max(map(len, col)) for col in zip(*table)]
+    col_size = [max(map(len, col)) for col in zip(*table, strict=True)]
 
     fmt_str = " | ".join([f"{{:<{i}}}" for i in col_size])
     table.insert(1, ["-" * i for i in col_size])  # Seperating line
@@ -229,7 +228,7 @@ def show_summary(lib, query, category, stats, reverse):
 
     items = lib.items(query)
     stats = parse_stats(stats)
-    sort_stat = list(stats.keys())[0]
+    sort_stat = next(iter(stats.keys()))
 
     for stat in stats.values():
         set_str_converter(stat, type(getattr(items[0], stat["field"])))

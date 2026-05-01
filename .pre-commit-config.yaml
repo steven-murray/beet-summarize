@@ -16,44 +16,18 @@ repos:
   - id: mixed-line-ending
     args: ['--fix=no']
 
-- repo: https://github.com/PyCQA/flake8
-  rev: 7.3.0
-  hooks:
-  - id: flake8
-    additional_dependencies:
-      - flake8-comprehensions
-      - flake8-logging-format
-      - flake8-builtins
-      - flake8-eradicate
-      - pep8-naming
-      - flake8-pytest
-      - flake8-docstrings
-      - flake8-rst-docstrings
-      - flake8-rst
-      - flake8-copyright
-      - flake8-markdown
-      - flake8-bugbear
-      - flake8-comprehensions
-      - flake8-print
-
-
-- repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 26.3.1
-  hooks:
-  - id: black
-
-- repo: https://github.com/PyCQA/isort
-  rev: 9.0.0a3
-  hooks:
-  - id: isort
-
 - repo: https://github.com/pre-commit/pygrep-hooks
   rev: v1.10.0
   hooks:
     - id: rst-backticks
 
-- repo: https://github.com/asottile/pyupgrade
-  rev: v3.21.2
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  # Ruff version.
+  rev: v0.14.14
   hooks:
-  -   id: pyupgrade
-      args: [--py38-plus]
+    # Run the linter.
+    - id: ruff
+      args: [--fix]
+
+    # Run the formatter.
+    - id: ruff-format
