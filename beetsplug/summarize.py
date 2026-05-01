@@ -193,7 +193,7 @@ def print_dct_as_table(keys, dcts, cat_name=None, col_formats=None) -> str:
     """
     columns = list(dcts[0].keys())
 
-    table = [cat_name, *columns] if cat_name else ["", *columns]
+    table = [[cat_name, *columns]] if cat_name else [["", *columns]]
 
     for key, item in zip(keys, dcts, strict=True):
         content = [
@@ -202,7 +202,7 @@ def print_dct_as_table(keys, dcts, cat_name=None, col_formats=None) -> str:
             )
             for col in columns
         ]
-        table.append(str(key), *content)
+        table.append([str(key), *content])
 
     col_size = [max(map(len, col)) for col in zip(*table, strict=True)]
 
