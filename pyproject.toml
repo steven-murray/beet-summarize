@@ -50,13 +50,13 @@ dynamic = ["version"]
 Repository = "https://github.com/steven-murray/beet-summarize"
 Changelog = "https://github.com/steven-murray/beet-summarize/releases"
 
-[project.optional-dependencies]
+[dependency-groups]
 tests = [
     "pytest",
     "pytest-cov"
 ]
 
 dev = [
-    "pre-commit",
-    "summarize[tests]",
+    {include-group = "tests"},
+    "prek",
 ]
