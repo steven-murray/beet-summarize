@@ -34,7 +34,7 @@ jobs:
         run: |
           python -m pytest --cov-config=.coveragerc --cov-report xml:./coverage.xml
 
-      - uses: codecov/codecov-action@v6
+      - uses: codecov/codecov-action@v7
         if: success()
         with:
           file: ./coverage.xml #optional
